@@ -27,7 +27,7 @@ import com.graphhopper.routing.weighting.SpeedWeighting;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.EdgeIteratorState;
-import com.graphhopper.util.IntsRef;
+import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.FetchMode;
 import org.junit.jupiter.api.Test;
