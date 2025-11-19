@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.target>21</maven.compiler.target>
 
         <!-- Ensure surefire's ${argLine} resolves to empty when not set (e.g. PIT runs) -->
         <argLine></argLine>
@@ -185,14 +185,14 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.11.0</version>
                     <configuration>
                         <!--
                         <compilerArgument>-Xlint:unchecked</compilerArgument>
                         <compilerArgument>-Xlint:deprecation</compilerArgument>
                         -->
                         <fork>true</fork>
-                        <release>17</release>
+                        <release>21</release>
                     </configuration>
                 </plugin>
 
