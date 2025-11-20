@@ -49,7 +49,7 @@ jobs:
       - name: Check mutation score
         if: matrix.java-version == '24'
         run: |
-          mvn -q org.pitest:pitest-maven:mutationCoverage -pl core
+          mvn -q org.pitest:pitest-maven:mutationCoverage -pl core -am
 
           PREVIOUS=$(cat mutation_baseline.txt 2>/dev/null || echo "0")
 
