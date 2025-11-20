@@ -37,3 +37,39 @@ jobs:
       - name: Build ${{ matrix.java-version }}
         run: mvn -B clean test
 
+      - name: Download mutation baseline
+        if: matrix.java-version == '24'
+        uses: actions/download-artifact@v4
+        with:
+          name: mutation-baseline
+          path: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-failure: true
+
+      - name: Check mutation score
+        if: matrix.java-version == '24'
+        run: |
+          mvn -q org.pitest:pitest-maven:mutationCoverage
+
+          PREVIOUS=$(cat mutation_baseline.txt 2>/dev/null || echo "0")
+
+          CURRENT=$(sed -n '/<tbody>/,/<\/tbody>/p' core/target/pit-reports/index.html 2>/dev/null | grep -oE '<td>[0-9]+%' | sed -n '2p' | sed 's/<td>\([0-9]*\)%/\1/' || echo "0")
+          CURRENT=${CURRENT:-0}
+
+          echo "Previous: $PREVIOUS, Current: $CURRENT"
+
+          if [ "$CURRENT" -lt "$PREVIOUS" ]; then
+            echo "Mutation score decreased from $PREVIOUS to $CURRENT"
+            exit 1
+          fi
+
+          echo "$CURRENT" > mutation_baseline.txt
+
+      - name: Upload mutation baseline
+        if: matrix.java-version == '24' && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-baseline
+          path: mutation_baseline.txt
+          retention-days: 30
+
