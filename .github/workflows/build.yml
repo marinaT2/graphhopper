@@ -37,14 +37,20 @@ jobs:
       - name: Build ${{ matrix.java-version }}
         run: mvn -B clean test
 
-      - name: Download mutation baseline
+      - name: Récupération de l'ancien baseline (silencieux)
         if: matrix.java-version == '24'
         continue-on-error: true
-        uses: actions/download-artifact@v4
-        with:
-          name: mutation-baseline
-          path: .
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Téléchargement du baseline précédent..."
+          gh run download --name mutation-baseline || echo "Aucun baseline trouvé."
+
+          # Si aucun fichier n'a été téléchargé, on initialise à 0
+          if [ ! -f mutation_baseline.txt ]; then
+            echo "0" > mutation_baseline.txt
+            echo "Baseline initial créé (0)."
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Check mutation score
         if: matrix.java-version == '24'
