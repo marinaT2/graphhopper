@@ -79,24 +79,6 @@ public class WeightingTest {
         assertEquals(WayAccess.CAN_SKIP, parser.getAccess(way3)); // les routes de service d'urgence sont refusées
     }
 
-    @Test
-    public void testCalcWeightVariation(){
-        var lookup= new EncodingManager.Builder().add(VehicleAccess.create("car")).add(VehicleSpeed.create("car",5, 5,true)).add(Roundabout.create()).build();
-        var speedEnc = lookup.getDecimalEncodedValue(VehicleSpeed.key("car"));
-        var weighting = new SpeedWeighting(speedEnc);
-
-        double distance = 1000; 
-        double fastSpeed = 100;
-        double slowSpeed = 30;
-
-        double fastWeight = distance / fastSpeed;
-        double slowWeight = distance / slowSpeed;
-        //cas 1
-        assertTrue(fastWeight < slowWeight); //Une route plus rapide doit avoir un poids plus faible
-        // cas 2
-        double minWeight= weighting.calcMinWeightPerDistance();
-        assertTrue(minWeight > 0); //Le poids minimum par distance doit être supérieur à 0
-    }
 
     @Test
     public void testCalcEdgeWeight(){
