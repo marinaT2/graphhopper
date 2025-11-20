@@ -39,12 +39,12 @@ jobs:
 
       - name: Download mutation baseline
         if: matrix.java-version == '24'
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: mutation-baseline
           path: .
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          allow-failure: true
 
       - name: Check mutation score
         if: matrix.java-version == '24'
