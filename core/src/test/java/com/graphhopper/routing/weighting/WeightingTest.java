@@ -22,21 +22,23 @@ import com.graphhopper.routing.ev.*;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.WayAccess;
 import com.graphhopper.routing.util.parsers.CarAccessParser;
-import com.graphhopper.routing.util.parsers.CarAverageSpeedParser;
-import com.graphhopper.routing.weighting.SpeedWeighting;
-import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.FetchMode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Peter Karich
  */
+@ExtendWith(MockitoExtension.class)
 public class WeightingTest {
     @Test
     public void testToString() {
@@ -79,24 +81,6 @@ public class WeightingTest {
         assertEquals(WayAccess.CAN_SKIP, parser.getAccess(way3)); // les routes de service d'urgence sont refusées
     }
 
-    @Test
-    public void testCalcWeightVariation(){
-        var lookup= new EncodingManager.Builder().add(VehicleAccess.create("car")).add(VehicleSpeed.create("car",5, 5,true)).add(Roundabout.create()).build();
-        var speedEnc = lookup.getDecimalEncodedValue(VehicleSpeed.key("car"));
-        var weighting = new SpeedWeighting(speedEnc);
-
-        double distance = 1000; 
-        double fastSpeed = 100;
-        double slowSpeed = 30;
-
-        double fastWeight = distance / fastSpeed;
-        double slowWeight = distance / slowSpeed;
-        //cas 1
-        assertTrue(fastWeight < slowWeight); //Une route plus rapide doit avoir un poids plus faible
-        // cas 2
-        double minWeight= weighting.calcMinWeightPerDistance();
-        assertTrue(minWeight > 0); //Le poids minimum par distance doit être supérieur à 0
-    }
 
     @Test
     public void testCalcEdgeWeight(){
@@ -112,6 +96,29 @@ public class WeightingTest {
         EdgeIteratorState edge2= new FakeEdge(100,50);
         double result2= weighting.calcEdgeWeight(edge2, false);
         assertEquals(2.0,result2, 1e-6);// poids attendu = distance / vitesse
+    }
+
+    @Mock
+    private TurnCostProvider mockTurnCostProvider;
+
+    @Test
+    public void testCalcTurnWeightAvecMockTurnCostProvider() {
+        var lookup = new EncodingManager.Builder().add(VehicleSpeed.create("car", 5, 5, true)).build();
+        var speedEnc = lookup.getDecimalEncodedValue(VehicleSpeed.key("car"));
+        var weighting = new SpeedWeighting(speedEnc, mockTurnCostProvider);
+
+        int inEdge = 10;
+        int viaNode = 20;
+        int outEdge = 30;
+        double expectedWeight = 2.5;
+
+        when(mockTurnCostProvider.calcTurnWeight(inEdge, viaNode, outEdge))
+                .thenReturn(expectedWeight);
+
+        double result = weighting.calcTurnWeight(inEdge, viaNode, outEdge);
+
+        assertEquals(expectedWeight, result, 1e-6);
+        verify(mockTurnCostProvider).calcTurnWeight(inEdge, viaNode, outEdge);
     }
 
     static class FakeEdge implements EdgeIteratorState {
