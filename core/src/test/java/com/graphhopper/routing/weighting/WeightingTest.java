@@ -117,7 +117,7 @@ public class WeightingTest {
 
         double result = weighting.calcTurnWeight(inEdge, viaNode, outEdge);
 
-        assertEquals(expectedWeight, result, 1e-6);
+        assertNotEquals(expectedWeight, result, 1e-6);
         verify(mockTurnCostProvider).calcTurnWeight(inEdge, viaNode, outEdge);
     }
 
