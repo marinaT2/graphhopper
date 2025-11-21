@@ -86,6 +86,8 @@ jobs:
     needs: build
     if: failure()
     steps:
+    - name: checkout repository
+      uses: actions/checkout@v4
     - name: Rickroll on tests
       uses: ./.github/actions/rickroll
       with:
